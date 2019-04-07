@@ -6,7 +6,7 @@ import (
 	"../greetpb"
 )
 
-func Test_doUnary(t *testing.T) {
+func Test_doServerStreaming(t *testing.T) {
 	type args struct {
 		c greetpb.GreetServiceClient
 	}
@@ -18,7 +18,20 @@ func Test_doUnary(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			doUnary(tt.args.c)
+			doServerStreaming(tt.args.c)
+		})
+	}
+}
+
+func Test_main(t *testing.T) {
+	tests := []struct {
+		name string
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			main()
 		})
 	}
 }
