@@ -2,10 +2,9 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net"
-	"strconv"
-	"time"
 
 	"../greetpb"
 
@@ -14,18 +13,23 @@ import (
 
 type server struct{}
 
-func (*server) GreetManyTimes(req *greetpb.GreetManyTimesRequest, stream greetpb.GreetService_GreetManyTimesServer) error {
-	fmt.Printf("Greet Many Times function was invoked with %v \n", req)
-	firstName := req.GetGreeting().GetFirstName()
-	for i := 0; i < 10; i++ {
-		result := "hello " + firstName + " number " + strconv.Itoa(i)
-		res := &greetpb.GreetManyTimesResponse{
-			Result: result,
+func (*server) LongGreet(stream greetpb.GreetService_LongGreetServer) error {
+	fmt.Printf("LongGreet function was run streaming request \n")
+	result := "Hallo "
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			return stream.SendAndClose(&greetpb.LongGreetResponse{
+				Result: result,
+			})
 		}
-		stream.Send(res)
-		time.Sleep(1000 * time.Millisecond)
+		if err != nil {
+			log.Fatalf("Error while reading client stream : %v", err)
+		}
+		firstName := req.GetGreeting().GetFirstName()
+		result += firstName + " ! "
 	}
-	return nil
+
 }
 
 func main() {
