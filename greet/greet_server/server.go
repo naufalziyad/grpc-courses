@@ -5,6 +5,8 @@ import (
 	"io"
 	"log"
 	"net"
+	"strconv"
+	"time"
 
 	"../greetpb"
 
@@ -29,8 +31,6 @@ func (*server) LongGreet(stream greetpb.GreetService_LongGreetServer) error {
 		firstName := req.GetGreeting().GetFirstName()
 		result += firstName + " ! "
 	}
-
-}
 
 func main() {
 	fmt.Println("Hallo my course proto")

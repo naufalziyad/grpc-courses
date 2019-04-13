@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"time"
 
@@ -22,7 +23,6 @@ func main() {
 
 	c := greetpb.NewGreetServiceClient(cc)
 
-	// doServerStreaming(c)
 	doClientStreaming(c)
 
 }
