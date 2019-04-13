@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"io"
 	"log"
+	"time"
 
 	"../greetpb"
 
@@ -22,32 +22,61 @@ func main() {
 
 	c := greetpb.NewGreetServiceClient(cc)
 
-	doServerStreaming(c)
+	// doServerStreaming(c)
+	doClientStreaming(c)
 
 }
 
-func doServerStreaming(c greetpb.GreetServiceClient) {
-	fmt.Println("Starting Server  Streaming RPC...")
+func doClientStreaming(c greetpb.GreetServiceClient) {
+	fmt.Println("Starting Client streaming RPC")
 
-	req := &greetpb.GreetManyTimesRequest{
-		Greeting: &greetpb.Greeting{
-			FirstName: "Naufal",
-			LastName:  "Ziyad Luthfiansyah",
+	requests := []*greetpb.LongGreetRequest{
+		&greetpb.LongGreetRequest{
+			Greeting: &greetpb.Greeting{
+				FirstName: "Naufal",
+			},
+		},
+		&greetpb.LongGreetRequest{
+			Greeting: &greetpb.Greeting{
+				FirstName: "Ziyad",
+			},
+		},
+		&greetpb.LongGreetRequest{
+			Greeting: &greetpb.Greeting{
+				FirstName: "Luthfiansyah",
+			},
+		},
+		&greetpb.LongGreetRequest{
+			Greeting: &greetpb.Greeting{
+				FirstName: "Lutfi",
+			},
+		},
+		&greetpb.LongGreetRequest{
+			Greeting: &greetpb.Greeting{
+				FirstName: "Zahid",
+			},
+		},
+		&greetpb.LongGreetRequest{
+			Greeting: &greetpb.Greeting{
+				FirstName: "Fian",
+			},
 		},
 	}
-	resStream, err := c.GreetManyTimes(context.Background(), req)
+
+	stream, err := c.LongGreet(context.Background())
 	if err != nil {
-		log.Fatalf("Error while calling greet many time %v", err)
+		fmt.Printf("Error while calling Longreet : %v", err)
 	}
-	for {
-		msg, err := resStream.Recv()
-		if err == io.EOF {
-			//we've reached the end of stream
-			break
-		}
-		if err != nil {
-			log.Fatalf("Error while reading streaming %v", err)
-		}
-		log.Printf("Response from GreetManyTimes : %v", msg.GetResult())
+
+	for _, req := range requests {
+		fmt.Printf("Sending req : %v \n", req)
+		stream.Send(req)
+		time.Sleep(1000 * time.Millisecond)
 	}
+
+	res, err := stream.CloseAndRecv()
+	if err != nil {
+		log.Fatalf("Error while receiving response from LongGreet : %v", err)
+	}
+	fmt.Printf("LongGreet Response : %v \n ", res)
 }
