@@ -13,21 +13,27 @@ import (
 
 type server struct{}
 
-func (*server) LongGreet(stream greetpb.GreetService_LongGreetServer) error {
-	fmt.Printf("LongGreet function was run streaming request \n")
-	result := "Hallo "
+func (*server) GreatEveryone(stream greetpb.GreetService_GreatEveryoneServer) error {
+	fmt.Printf("GreatEveryone function was run streaming request \n")
+
 	for {
 		req, err := stream.Recv()
 		if err == io.EOF {
-			return stream.SendAndClose(&greetpb.LongGreetResponse{
-				Result: result,
-			})
+			return nil
 		}
 		if err != nil {
-			log.Fatalf("Error while reading client stream : %v", err)
+			log.Fatalf("Error while calling server", err)
+			return err
 		}
 		firstName := req.GetGreeting().GetFirstName()
-		result += firstName + " ! "
+		result := "Haiii " + firstName + " !"
+
+		sendErr := stream.Send(&greetpb.GreetEveryoneResponse{
+			Result: result,
+		})
+		if sendErr != nil {
+			log.Fatalf("Error while sending data to client : %v", err)
+		}
 	}
 
 }
