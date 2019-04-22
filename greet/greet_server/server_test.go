@@ -49,3 +49,23 @@ func Test_server_Greet(t *testing.T) {
 		})
 	}
 }
+
+func Test_server_GreatEveryone(t *testing.T) {
+	type args struct {
+		stream greetpb.GreetService_GreatEveryoneServer
+	}
+	tests := []struct {
+		name    string
+		s       *server
+		args    args
+		wantErr bool
+	}{}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &server{}
+			if err := s.GreatEveryone(tt.args.stream); (err != nil) != tt.wantErr {
+				t.Errorf("server.GreatEveryone() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
