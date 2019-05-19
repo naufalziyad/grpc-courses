@@ -26,13 +26,14 @@ func (*server) GreatEveryone(stream greetpb.GreetService_GreatEveryoneServer) er
 			return err
 		}
 		firstName := req.GetGreeting().GetFirstName()
-		result := "Haiii " + firstName + " !"
+		result := "Haiii " + firstName + " ! \n"
 
 		sendErr := stream.Send(&greetpb.GreetEveryoneResponse{
 			Result: result,
 		})
 		if sendErr != nil {
 			log.Fatalf("Error while sending data to client : %v", err)
+			return err
 		}
 	}
 
