@@ -5,6 +5,8 @@ import (
 	"io"
 	"log"
 	"net"
+	"strconv"
+	"time"
 
 	"../greetpb"
 
@@ -36,8 +38,6 @@ func (*server) GreatEveryone(stream greetpb.GreetService_GreatEveryoneServer) er
 			return err
 		}
 	}
-
-}
 
 func main() {
 	fmt.Println("Hallo my course proto")
