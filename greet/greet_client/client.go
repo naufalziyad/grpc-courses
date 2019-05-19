@@ -23,60 +23,81 @@ func main() {
 
 	c := greetpb.NewGreetServiceClient(cc)
 
-	doClientStreaming(c)
+	doBiDiStreaming(c)
+
 
 }
 
-func doClientStreaming(c greetpb.GreetServiceClient) {
-	fmt.Println("Starting Client streaming RPC")
+func doBiDiStreaming(c greetpb.GreetServiceClient) {
+	fmt.Println("starting to do a BiDi Streaming RPC")
+	stream, err := c.GreatEveryone(context.Background())
+	if err != nil {
+		log.Fatalf("error while creating stream : %v\n", err)
+		return
+	}
 
-	requests := []*greetpb.LongGreetRequest{
-		&greetpb.LongGreetRequest{
+	//requests
+	requests := []*greetpb.GreetEveryoneRequest{
+		&greetpb.GreetEveryoneRequest{
 			Greeting: &greetpb.Greeting{
 				FirstName: "Naufal",
 			},
 		},
-		&greetpb.LongGreetRequest{
+		&greetpb.GreetEveryoneRequest{
 			Greeting: &greetpb.Greeting{
 				FirstName: "Ziyad",
 			},
 		},
-		&greetpb.LongGreetRequest{
+		&greetpb.GreetEveryoneRequest{
 			Greeting: &greetpb.Greeting{
 				FirstName: "Luthfiansyah",
 			},
 		},
-		&greetpb.LongGreetRequest{
+		&greetpb.GreetEveryoneRequest{
 			Greeting: &greetpb.Greeting{
 				FirstName: "Lutfi",
 			},
 		},
-		&greetpb.LongGreetRequest{
+		&greetpb.GreetEveryoneRequest{
 			Greeting: &greetpb.Greeting{
 				FirstName: "Zahid",
 			},
 		},
-		&greetpb.LongGreetRequest{
+		&greetpb.GreetEveryoneRequest{
 			Greeting: &greetpb.Greeting{
 				FirstName: "Fian",
 			},
 		},
 	}
 
-	stream, err := c.LongGreet(context.Background())
-	if err != nil {
-		fmt.Printf("Error while calling Longreet : %v", err)
-	}
+	waitc := make(chan struct{})
 
-	for _, req := range requests {
-		fmt.Printf("Sending req : %v \n", req)
-		stream.Send(req)
-		time.Sleep(1000 * time.Millisecond)
-	}
+	go func() {
+		//function to send messages
+		for _, req := range requests {
+			fmt.Printf("Sending Message : %v\n", req)
+			stream.Send(req)
+			time.Sleep(1000 * time.Millisecond)
+		}
+		stream.CloseSend()
 
-	res, err := stream.CloseAndRecv()
-	if err != nil {
-		log.Fatalf("Error while receiving response from LongGreet : %v", err)
-	}
-	fmt.Printf("LongGreet Response : %v \n ", res)
+	}()
+
+	go func() {
+		for {
+			res, err := stream.Recv()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				log.Fatalf("error while receiving: %v\n", err)
+				break
+			}
+			fmt.Printf("Received: %v", res.GetResult())
+		}
+
+	}()
+
+	<-waitc
+
 }
